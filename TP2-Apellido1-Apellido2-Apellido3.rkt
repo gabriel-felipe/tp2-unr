@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname TP2-Apellido1-Apellido2-Apellido3) (read-case-sensitive #t) (teachpacks ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "batch-io.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "universe.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp") (lib "batch-io.rkt" "teachpack" "2htdp")) #f)))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname TP2-Apellido1-Apellido2-Apellido3) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp")) #f)))
 #|
 Trabajo Práctico 2: Listas
 
@@ -34,7 +34,7 @@ Integrantes:
                                            (make-Registro 2006 -1))))
 (define GUATEMALA (make-Pais "Guatemala" (list (make-Registro 20018 -1)
                                                (make-Registro 20019 32500000))))
-(define ARGENTINA (make-Pais "Angentina" (list (make-Registro 2014 35000000)
+(define ARGENTINA (make-Pais "Argentina" (list (make-Registro 2014 35000000)
                                                (make-Registro 2015 40000000))))
 (define CHINA (make-Pais "China" (list (make-Registro 2018 999999956)
                                        (make-Registro 2019 1000000045))))
@@ -116,10 +116,13 @@ Integrantes:
 (define (armar-paises lnp lr)
   (cond [(empty? lnp) empty]
         [(empty? lr) empty]
-        [else (cons #|COMPLETAR|# #|COMPLETAR|#)]))
+        [else (cons (make-Pais (first lnp) (first lr))
+                    (armar-paises (rest lnp) (rest lr)))]))
 
 ; Nombres de países
-(define LISTA-NOMBRE-PAISES (map #|COMPLETAR|# DATOS-PAISES))
+(define LISTA-NOMBRE-PAISES (map first DATOS-PAISES))
+
+
 ; Lista de países
 (define LISTA-PAISES (armar-paises LISTA-NOMBRE-PAISES LISTA-REGISTROS))
 
@@ -149,6 +152,12 @@ Integrantes:
 ; Sección 1 - Datos incompletos y datos incorrectos
 ;---------------------------------------------
 
+(define (registro-esta-incompleto r)
+  (= (Registro-Poblacion r) -1))
+
+(define (pais-tiene-registro-completo p)
+  (empty? (filter registro-esta-incompleto (Pais-Registros p))))
+
 ; Algunos países no tienen datos oficiales completos. Removerlos de la lista de paises.
 ; Definir una función predicado-registro-incompleto, transformacion-registro-incompleto
 ; u operacion-registro-incompleto para pasarle como argumento a
@@ -160,7 +169,7 @@ Integrantes:
 #|COMPLETAR|# ;definición función auxiliar
 
 (define LISTA-PAISES-REGISTRO-COMPLETO
-  (#|COMPLETAR|# LISTA-PAISES #|COMPLETAR|#))
+  (filtrar-paises LISTA-PAISES pais-tiene-registro-completo))
 
 ; Algunos casos de test para LISTA-PAISES-REGISTRO-COMPLETO
 ; "West Bank and Gaza" no tiene que estar en el listado de países
@@ -191,12 +200,12 @@ Integrantes:
 ; transformacion-recalcular toma un país y aumenta en 10% la población asociada
 ; al año 2014 en sus registros
 (check-expect (transformacion-recalcular ARGENTINA)
-              (make-Pais "Angentina" (list (make-Registro 2014 38500000)
+              (make-Pais "Argentina" (list (make-Registro 2014 38500000)
                                            (make-Registro 2015 40000000))))
 (check-expect (transformacion-recalcular CHINA) CHINA)
 
 (define (transformacion-recalcular pais)
-  (make-Pais #|COMPLETAR|# #|COMPLETAR|#))
+  (make-Pais (Pais-Nombre pais) (map recalculo (Pais-Registros pais))))
 
 (define LISTA-PAISES-RECALCULADA
   (transformar-paises LISTA-PAISES-REGISTRO-COMPLETO transformacion-recalcular))
@@ -236,8 +245,8 @@ Integrantes:
 
 (define (last l)
   (cond [(empty? l) #f]
-        [#|COMPLETAR|# (first l)]
-        [else #|COMPLETAR|#]))
+        [(= 1 (length l)) (first l)]
+        [else (last (rest l))]))
 
 ; predicado-superpoblados Pais -> Boolean
 ; predicado-superpoblados toma un país y devuelve #t en el caso que haya
@@ -247,15 +256,18 @@ Integrantes:
 (check-expect (predicado-superpoblados CHINA) #t)
 
 (define (predicado-superpoblados pais)
-  #|COMPLETAR|#)
+  (> 
+    (Registro-Poblacion (last (Pais-Registros pais)))
+    MILMILLONES))
 
 (define LISTA-PAISES-SUPERPOBLADOS
   (filtrar-paises LISTA-PAISES-RECALCULADA predicado-superpoblados))
 
 ; Nombres de los países superpoblados
-(define NOMBRES-PAISES-SUPERPOBLADOS (#|COMPLETAR|# Pais-Nombre LISTA-PAISES-SUPERPOBLADOS))
+(define NOMBRES-PAISES-SUPERPOBLADOS (map Pais-Nombre LISTA-PAISES-SUPERPOBLADOS))
+
 ; Cantidad de países sobrepoblados
-(define CANT-PAISES-SUPERPOBLADOS #|COMPLETAR|#)
+(define CANT-PAISES-SUPERPOBLADOS (length LISTA-PAISES-SUPERPOBLADOS))
 
 ; Porcentaje de población en países superpoblados:
 ; Suma de poblaciones de países superpoblados / población mundial
@@ -266,9 +278,12 @@ Integrantes:
 ; #|COMPLETAR|# declaracion de proposito
 #|COMPLETAR|# ;casos de prueba
 
+
 (define (operacion-sumar-poblaciones pais n)
-  (+ n (foldr #|COMPLETAR|# #|COMPLETAR|# (#|COMPLETAR|# Registro-Poblacion (Pais-Registros pais)))))
+  (+ n
+     (Registro-Poblacion
+      (last (Pais-Registros pais)))))
 
 (define TASA-POBLACION-SUPERPOBLADOS
-  (/ (operar-sobre-paises LISTA-PAISES-SUPERPOBLADOS operacion-sumar-poblaciones #|COMPLETAR|#)
-     (operar-sobre-paises LISTA-PAISES operacion-sumar-poblaciones #|COMPLETAR|#)))
+  (/ (operar-sobre-paises LISTA-PAISES-SUPERPOBLADOS operacion-sumar-poblaciones 0)
+     (operar-sobre-paises LISTA-PAISES operacion-sumar-poblaciones 0)))
