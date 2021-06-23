@@ -3,7 +3,6 @@
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname TP2-Apellido1-Apellido2-Apellido3) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp")) #f)))
 #|
 Trabajo Práctico 2: Listas
-
 Integrantes:
 - [Apellido, Nombre].
 - [Apellido, Nombre].
@@ -18,26 +17,26 @@ Integrantes:
 ; Representamos los nombres de los países con String y
 ; las fechas (año) y el número de habitantes de un país con Number.
 
-(define-struct Registro [Fecha Poblacion])
-; Registro es (Number, Number)
-; Interpretación: un elemento en Registro representa el número
+(define-struct registro [Fecha Poblacion])
+; registro es (Number, Number)
+; Interpretación: un elemento en registro representa el número
 ; de habitantes de un país (Poblacion) en una determinada fecha (Fecha).
 
-(define-struct Pais [Nombre Registros])
-; Pais es (String, List(Registro))
-; Interpretación: un elemento en Pais representa un pais de nombre
-; Nombre con su lista de registros de censo asociado Registros.
+(define-struct pais [Nombre registros])
+; pais es (String, List(registro))
+; Interpretación: un elemento en pais representa un pais de nombre
+; Nombre con su lista de registros de censo asociado registros.
 
 ;---------------------Constantes para casos de prueba------------------------
 
-(define ANDORRA (make-Pais "Andorra" (list (make-Registro 2005 35000000)
-                                           (make-Registro 2006 -1))))
-(define GUATEMALA (make-Pais "Guatemala" (list (make-Registro 20018 -1)
-                                               (make-Registro 20019 32500000))))
-(define ARGENTINA (make-Pais "Argentina" (list (make-Registro 2014 35000000)
-                                               (make-Registro 2015 40000000))))
-(define CHINA (make-Pais "China" (list (make-Registro 2018 999999956)
-                                       (make-Registro 2019 1000000045))))
+(define ANDORRA (make-pais "Andorra" (list (make-registro 2005 35000000)
+                                           (make-registro 2006 -1))))
+(define GUATEMALA (make-pais "Guatemala" (list (make-registro 2018 -1)
+                                               (make-registro 2019 32500000))))
+(define ARGENTINA (make-pais "Argentina" (list (make-registro 2014 35000000)
+                                               (make-registro 2015 40000000))))
+(define CHINA (make-pais "China" (list (make-registro 2018 999999956)
+                                       (make-registro 2019 1000000045))))
 
 ;---------------------Preparación de los datos------------------------
 
@@ -53,26 +52,26 @@ Integrantes:
 ; Años en los que se realizaron censos [1960,2019]
 (define RANGO-FECHA (range FECHA-INICIO (+ FECHA-FIN 1) 1))
 
-; armar-registros: List(Number) List(String) -> List(Registro)
+; armar-registros: List(Number) List(String) -> List(registro)
 ; armar-registros toma una lista de años *lf* y una lista de strings que representan números
 ; de habitantes *lnh* y devuelve una lista de registros *lr* en donde el i-ésimo
 ; elemento de *lr* se contruye a partir del i-ésimo elemento de *lf* y
 ; el i-ésimo elemento de *lnh* convertido a número
 (check-expect (armar-registros (list 2005 2006) (list "3" "4"))
-              (list (make-Registro 2005 3) (make-Registro 2006 4)))
+              (list (make-registro 2005 3) (make-registro 2006 4)))
 (check-expect (armar-registros (list 2005 2006) empty) empty)
-(check-expect (armar-registros empty (list (make-Registro 2005 3))) empty)
+(check-expect (armar-registros empty (list (make-registro 2005 3))) empty)
 (check-expect (armar-registros empty empty) empty)
 
 (define (armar-registros lf lnh)
   (cond [(empty? lnh) empty]
         [(empty? lf) empty]
-        [else (cons (make-Registro (first lf) (string->number (first lnh)))
+        [else (cons (make-registro (first lf) (string->number (first lnh)))
                     (armar-registros (rest lf) (rest lnh)))]))
 
-; armar-lista-registros List(List(String)) List(Number) -> List(List(Registro))
+; armar-lista-registros List(List(String)) List(Number) -> List(List(registro))
 ; armar-lista-registros toma una lista de listas de strings que representan cantidad de habitantes
-; *lnh* y una lista de años *lf* y devuelve una lista de listas de Registro *lr*
+; *lnh* y una lista de años *lf* y devuelve una lista de listas de registro *lr*
 ; Los campos Población de los elementos de *lr* coinciden con los elementos de *lnh*
 ; y su campo fecha se completa con los años de *lf*.
 (check-expect (armar-lista-registros empty empty) empty)
@@ -83,9 +82,9 @@ Integrantes:
                         (list "5" "6")
                         (list "7" "8"))
                   (list 2005 2006))
-              (list (list (make-Registro 2005 3) (make-Registro 2006 4))
-                    (list (make-Registro 2005 5) (make-Registro 2006 6))
-                    (list (make-Registro 2005 7) (make-Registro 2006 8))))
+              (list (list (make-registro 2005 3) (make-registro 2006 4))
+                    (list (make-registro 2005 5) (make-registro 2006 6))
+                    (list (make-registro 2005 7) (make-registro 2006 8))))
 
 (define (armar-lista-registros lnh lf)
   (cond [(empty? lnh) empty]
@@ -98,25 +97,25 @@ Integrantes:
 ; Lista de registros de cada país
 (define LISTA-REGISTROS (armar-lista-registros LISTA-DATOS-REGISTRO RANGO-FECHA))
 
-; armar-paises: List(String) List(Registro) -> List(Pais)
+; armar-paises: List(String) List(registro) -> List(pais)
 ; armar-paises toma una lista de nombres de países *lnp* y una lista de registros
-; poblacionales *lr* y devuelve una lista de estructura Pais *lp* en donde
+; poblacionales *lr* y devuelve una lista de estructura pais *lp* en donde
 ; el i-ésimo elemento de *lp* tiene de campo Nombre el i-ésimo elemento
-; de *lnp* y de campo Registros el i-ésimo elemento de *lr*
+; de *lnp* y de campo registros el i-ésimo elemento de *lr*
 (check-expect (armar-paises (list "Angola" "Andorra" "Argentina") empty) empty)
-(check-expect (armar-paises empty (list (list (make-Registro 2005 3) (make-Registro 2006 4)))) empty)
+(check-expect (armar-paises empty (list (list (make-registro 2005 3) (make-registro 2006 4)))) empty)
 (check-expect (armar-paises (list "Angola" "Andorra" "Argentina")
-                            (list (list (make-Registro 2005 3) (make-Registro 2006 4))
-                                  (list (make-Registro 2005 5) (make-Registro 2006 6))
-                                  (list (make-Registro 2005 7) (make-Registro 2006 8))))
-              (list (make-Pais "Angola" (list (make-Registro 2005 3) (make-Registro 2006 4)))
-                    (make-Pais "Andorra" (list (make-Registro 2005 5) (make-Registro 2006 6)))
-                    (make-Pais "Argentina" (list (make-Registro 2005 7) (make-Registro 2006 8)))))
+                            (list (list (make-registro 2005 3) (make-registro 2006 4))
+                                  (list (make-registro 2005 5) (make-registro 2006 6))
+                                  (list (make-registro 2005 7) (make-registro 2006 8))))
+              (list (make-pais "Angola" (list (make-registro 2005 3) (make-registro 2006 4)))
+                    (make-pais "Andorra" (list (make-registro 2005 5) (make-registro 2006 6)))
+                    (make-pais "Argentina" (list (make-registro 2005 7) (make-registro 2006 8)))))
 
 (define (armar-paises lnp lr)
   (cond [(empty? lnp) empty]
         [(empty? lr) empty]
-        [else (cons (make-Pais (first lnp) (first lr))
+        [else (cons (make-pais (first lnp) (first lr))
                     (armar-paises (rest lnp) (rest lr)))]))
 
 ; Nombres de países
@@ -128,20 +127,20 @@ Integrantes:
 
 ;---------------------Funciones de alto orden sobre listas de países------------------------
 
-; transformar-paises: List(Pais) (Pais -> Pais) -> List(Pais)
+; transformar-paises: List(pais) (pais -> pais) -> List(pais)
 (define (transformar-paises lp transformacion)
   (cond [(empty? lp) empty]
         [else (cons (transformacion (first lp))
                     (transformar-paises (rest lp) transformacion))]))
 
-; filtrar-paises: List(Pais) (Pais -> Boolean)-> List(Pais)
+; filtrar-paises: List(pais) (pais -> Boolean)-> List(pais)
 (define (filtrar-paises lp predicado)
   (cond [(empty? lp) empty]
         [else (if (predicado (first lp))
                   (cons (first lp) (filtrar-paises (rest lp) predicado))
                   (filtrar-paises (rest lp) predicado))]))
 
-; operar-sobre-paises: List(Pais) (Pais X -> X) X -> X
+; operar-sobre-paises: List(pais) (pais X -> X) X -> X
 (define (operar-sobre-paises lp operador neutro)
   (cond [(empty? lp) neutro]
         [else (operador (first lp) (operar-sobre-paises (rest lp) operador neutro))]))
@@ -152,21 +151,41 @@ Integrantes:
 ; Sección 1 - Datos incompletos y datos incorrectos
 ;---------------------------------------------
 
-(define (registro-esta-incompleto r)
-  (= (Registro-Poblacion r) -1))
+; registro-esta-incompleto: List(registro) -> Boolean
+; registro-esta-incompleto devuelve #true si alguno de los registros en la lista está
+; incompleto, comparando si el mismo es igual a -1. Si cuenta con todos sus registros
+; (son todos distintos a -1), devuelve #false
+(check-expect (registro-esta-incompleto (make-registro 2018 -1)) #t)     
+(check-expect (registro-esta-incompleto (make-registro 2019 100002)) #f)
+
+(define (registro-esta-incompleto r)   ; Hay que cambiarle el nombre a predicado-registro-incompleto ?
+  (= (registro-Poblacion r) -1))
+
+; pais-tiene-registro-completo: registro -> Boolean
+; pais-tiene-registro-completo devuelve #true si no falta ningun registro en la lista de
+; registros de un país.
+; Si falta un registro (si registro-esta-incompleto devuelve #true) entonces
+; pais-tiene-registro-completo devuelve #false
+(check-expect (pais-tiene-registro-completo ANDORRA) #f)
+(check-expect (pais-tiene-registro-completo ARGENTINA) #t)
 
 (define (pais-tiene-registro-completo p)
-  (empty? (filter registro-esta-incompleto (Pais-Registros p))))
+  (empty? (filter registro-esta-incompleto (pais-registros p))))
 
 ; Algunos países no tienen datos oficiales completos. Removerlos de la lista de paises.
 ; Definir una función predicado-registro-incompleto, transformacion-registro-incompleto
 ; u operacion-registro-incompleto para pasarle como argumento a
 ; alguno de los patrones de alto orden
 
-; #|COMPLETAR|# signatura función auxiliar
-; #|COMPLETAR|# declaracion de propósito función auxiliar
-#|COMPLETAR|# ;casos de prueba función auxiliar
-#|COMPLETAR|# ;definición función auxiliar
+; #|COMPLETAR|# signatura función auxiliar                   ;listo
+; #|COMPLETAR|# declaracion de propósito función auxiliar    ;listo
+#|COMPLETAR|# ;casos de prueba función auxiliar              ;listo 
+#|COMPLETAR|# ;definición función auxiliar                   ;listo (ver lo del nombre)
+
+
+; LISTA-PAISES-REGISTRO-COMPLETO: List(List(paises)) -> List(List(paises))
+; LISTA-PAISES-REGISTRO-COMPLETO toma una lista de paises con sus registros y devuelve
+; una nueva lista de paises incluyendo aquellos que tienen sus registros completos.
 
 (define LISTA-PAISES-REGISTRO-COMPLETO
   (filtrar-paises LISTA-PAISES pais-tiene-registro-completo))
@@ -174,38 +193,38 @@ Integrantes:
 ; Algunos casos de test para LISTA-PAISES-REGISTRO-COMPLETO
 ; "West Bank and Gaza" no tiene que estar en el listado de países
 ; con registro completo pero sí tienen que estar en el listado de países
-(check-expect (member "West Bank and Gaza" (map Pais-Nombre LISTA-PAISES)) #t)
-(check-expect (member "West Bank and Gaza" (map Pais-Nombre LISTA-PAISES-REGISTRO-COMPLETO)) #f)
+(check-expect (member "West Bank and Gaza" (map pais-Nombre LISTA-PAISES)) #t)
+(check-expect (member "West Bank and Gaza" (map pais-Nombre LISTA-PAISES-REGISTRO-COMPLETO)) #f)
 
 ; Los censos del 2014 se calcularon mal. Aumentarlos un 10%.
 ; Trabajamos con la lista de países con registro completo
 
 ; Función auxiliar extra de ayuda, se recomienda utilizar
-; recalculo: Registro -> Registro
+; recalculo: registro -> registro
 ; recalculo toma un registro e incrementa la población en un 10%
 ; si la fecha en la que se condujo el censo fue 2014
 ; En caso de que el incremento resulte en un número no entero,
 ; se redondea
-(check-expect (recalculo (make-Registro 2014 10))
-              (make-Registro 2014 11))
-(check-expect (recalculo (make-Registro 2016 10))
-              (make-Registro 2016 10))
+(check-expect (recalculo (make-registro 2014 10))
+              (make-registro 2014 11))
+(check-expect (recalculo (make-registro 2016 10))
+              (make-registro 2016 10))
 
 (define (recalculo reg)
-  (if (= (Registro-Fecha reg) 2014)
-      (make-Registro (Registro-Fecha reg) (exact-round (* 1.1 (Registro-Poblacion reg))))
-      (make-Registro (Registro-Fecha reg) (Registro-Poblacion reg))))
+  (if (= (registro-Fecha reg) 2014)
+      (make-registro (registro-Fecha reg) (exact-round (* 1.1 (registro-Poblacion reg))))
+      (make-registro (registro-Fecha reg) (registro-Poblacion reg))))
 
-; transformacion-recalcular: Pais -> Pais
+; transformacion-recalcular: pais -> pais
 ; transformacion-recalcular toma un país y aumenta en 10% la población asociada
 ; al año 2014 en sus registros
 (check-expect (transformacion-recalcular ARGENTINA)
-              (make-Pais "Argentina" (list (make-Registro 2014 38500000)
-                                           (make-Registro 2015 40000000))))
+              (make-pais "Argentina" (list (make-registro 2014 38500000)
+                                           (make-registro 2015 40000000))))
 (check-expect (transformacion-recalcular CHINA) CHINA)
 
 (define (transformacion-recalcular pais)
-  (make-Pais (Pais-Nombre pais) (map recalculo (Pais-Registros pais))))
+  (make-pais (pais-Nombre pais) (map recalculo (pais-registros pais))))
 
 (define LISTA-PAISES-RECALCULADA
   (transformar-paises LISTA-PAISES-REGISTRO-COMPLETO transformacion-recalcular))
@@ -213,14 +232,14 @@ Integrantes:
 ; Algunos casos de test para LISTA-PAISES-RECALCULADA
 ; Aruba 2014 original: 103774
 ; Afghanistan 2014 original: 33370794
-(check-expect (member (make-Registro 2014 103774)
-                      (Pais-Registros (first LISTA-PAISES-REGISTRO-COMPLETO))) #t)
-(check-expect (member (make-Registro 2014 33370794)
-                      (Pais-Registros (second LISTA-PAISES-REGISTRO-COMPLETO))) #t)
-(check-expect (member (make-Registro 2014 114151)
-                      (Pais-Registros (first LISTA-PAISES-RECALCULADA))) #t)
-(check-expect (member (make-Registro 2014 36707873)
-                      (Pais-Registros (second LISTA-PAISES-RECALCULADA))) #t)
+(check-expect (member (make-registro 2014 103774)
+                      (pais-registros (first LISTA-PAISES-REGISTRO-COMPLETO))) #t)
+(check-expect (member (make-registro 2014 33370794)
+                      (pais-registros (second LISTA-PAISES-REGISTRO-COMPLETO))) #t)
+(check-expect (member (make-registro 2014 114151)
+                      (pais-registros (first LISTA-PAISES-RECALCULADA))) #t)
+(check-expect (member (make-registro 2014 36707873)
+                      (pais-registros (second LISTA-PAISES-RECALCULADA))) #t)
 
 ;---------------------------------------------
 ; Sección 2 - Países superpoblados
@@ -248,7 +267,7 @@ Integrantes:
         [(= 1 (length l)) (first l)]
         [else (last (rest l))]))
 
-; predicado-superpoblados Pais -> Boolean
+; predicado-superpoblados pais -> Boolean
 ; predicado-superpoblados toma un país y devuelve #t en el caso que haya
 ; censado más de 1000 millones de habitantes en el 2019
 ; Suponemos que la última entrada de cada país se corresponde con el año 2019
@@ -257,14 +276,14 @@ Integrantes:
 
 (define (predicado-superpoblados pais)
   (> 
-    (Registro-Poblacion (last (Pais-Registros pais)))
+    (registro-Poblacion (last (pais-registros pais)))
     MILMILLONES))
 
 (define LISTA-PAISES-SUPERPOBLADOS
   (filtrar-paises LISTA-PAISES-RECALCULADA predicado-superpoblados))
 
 ; Nombres de los países superpoblados
-(define NOMBRES-PAISES-SUPERPOBLADOS (map Pais-Nombre LISTA-PAISES-SUPERPOBLADOS))
+(define NOMBRES-PAISES-SUPERPOBLADOS (map pais-Nombre LISTA-PAISES-SUPERPOBLADOS))
 
 ; Cantidad de países sobrepoblados
 (define CANT-PAISES-SUPERPOBLADOS (length LISTA-PAISES-SUPERPOBLADOS))
@@ -278,11 +297,14 @@ Integrantes:
 ; #|COMPLETAR|# declaracion de proposito
 #|COMPLETAR|# ;casos de prueba
 
+; operacion-sumar-poblaciones: List(pais) Number -> Number
+; suma el último elemento de la lista de registros de un país a la suma
+; de los últimos elementos de todos los registros de la lista de paises
 
 (define (operacion-sumar-poblaciones pais n)
   (+ n
-     (Registro-Poblacion
-      (last (Pais-Registros pais)))))
+     (registro-Poblacion
+      (last (pais-registros pais)))))
 
 (define TASA-POBLACION-SUPERPOBLADOS
   (/ (operar-sobre-paises LISTA-PAISES-SUPERPOBLADOS operacion-sumar-poblaciones 0)
