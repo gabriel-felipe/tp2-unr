@@ -4,9 +4,8 @@
 #|
 Trabajo Práctico 2: Listas
 Integrantes:
-- [Apellido, Nombre].
-- [Apellido, Nombre].
-- [Apellido, Nombre].
+- [Albornoz, Martín].
+- [Chiminelli, Gabriel].
 |#
 
 ;---------------------Diseño de datos------------------------
@@ -177,11 +176,6 @@ Integrantes:
 ; u operacion-registro-incompleto para pasarle como argumento a
 ; alguno de los patrones de alto orden
 
-; #|COMPLETAR|# signatura función auxiliar                   ;listo
-; #|COMPLETAR|# declaracion de propósito función auxiliar    ;listo
-#|COMPLETAR|# ;casos de prueba función auxiliar              ;listo 
-#|COMPLETAR|# ;definición función auxiliar                   ;listo (ver lo del nombre)
-
 
 ; LISTA-PAISES-REGISTRO-COMPLETO: List(List(paises)) -> List(List(paises))
 ; LISTA-PAISES-REGISTRO-COMPLETO toma una lista de paises con sus registros y devuelve
@@ -255,7 +249,7 @@ Integrantes:
 (define MILMILLONES 1000000000)
 
 ; Función auxiliar extra de ayuda, se recomienda utilizar
-; last: #|COMPLETAR|# signatura
+; last: list -> any
 ; last toma una lista y devuelve el último elemento si es no vacia
 ; Caso contrario devuelve false
 (check-expect (last empty) #f)
@@ -293,18 +287,19 @@ Integrantes:
 ; Suponemos que la población mundial se calcula a partir de las poblaciones
 ; de todos los países de los cuales tenemos registro.
 
-; operacion-sumar-poblaciones: #|COMPLETAR|#
-; #|COMPLETAR|# declaracion de proposito
-#|COMPLETAR|# ;casos de prueba
-
 ; operacion-sumar-poblaciones: List(pais) Number -> Number
-; suma el último elemento de la lista de registros de un país a la suma
-; de los últimos elementos de todos los registros de la lista de paises
+; suma las poblaciones historicas validas (≠ -1) la lista de registros de un país a n
 
+(check-expect (operacion-sumar-poblaciones ARGENTINA 0) 75000000)
+(check-expect (operacion-sumar-poblaciones CHINA 0) 2000000001)
+(check-expect (operacion-sumar-poblaciones GUATEMALA 0) 32500000)
 (define (operacion-sumar-poblaciones pais n)
   (+ n
-     (registro-Poblacion
-      (last (pais-registros pais)))))
+     (foldr + 0
+            (map registro-Poblacion
+                 (filter
+                  (lambda (r) (not (registro-esta-incompleto r)))
+                  (pais-registros pais))))))
 
 (define TASA-POBLACION-SUPERPOBLADOS
   (/ (operar-sobre-paises LISTA-PAISES-SUPERPOBLADOS operacion-sumar-poblaciones 0)
